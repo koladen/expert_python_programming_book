@@ -1,0 +1,30 @@
+LISTS
+
+Let's define n as the length of a list. Here is a full table of average time complexities for
+most of the list operations:
+Operation Complexity
+Copy O(n)
+Append O(1)
+Insert O(n)
+Get item O(1)
+Set item O(1)
+Delete item O(n)
+Iteration O(n)
+Get slice of length k O(k)
+Del slice O(n)
+Set slice of length k O(k+n)
+Extend O(k)
+Multiply by k O(nk)
+Test existence (element in list) O(n)
+min()/max() O(n)
+Get length O(1)
+
+DICTS
+
+Operation Average complexity Amortized worst case complexity
+Get item O(1) O(n)
+Set item O(1) O(n)
+Delete item O(1) O(n)
+Copy O(n) O(n)
+Iteration O(n) O(n)
+

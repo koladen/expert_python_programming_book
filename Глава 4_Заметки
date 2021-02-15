@@ -1,0 +1,98 @@
+Метаклассы
+
+The call to the built-in type() class can be usedas a dynamic equivalent of the class
+statement. The following is an example of a class definition with the type()call:
+def method(self):
+return 1
+MyClass = type('MyClass', (object,), {'method': method})
+This is equivalent to the explicit definition of the class with the classkeyword:
+class MyClass:
+def method(self):
+return 1
+Every class that's created with the class statement implicitly uses type as its metaclass. This
+default behavior can be changed by providing the metaclass keyword argument to the
+class statement, as follows:
+class ClassWithAMetaclass(metaclass=type):
+pass
+The value that's provided as a metaclass argument is usually another class object, but it
+can be any other callable that accepts the same arguments as the type class and is expected
+to return another class object. The call signature is type(name, bases, namespace) and
+the meaning of the arguments are as follows:
+name: This is the name of the class that will be stored in the __name__ attribute
+bases: This is the list of parent classes that will become the __bases__ attribute
+and will be used to construct the MRO of a newly created class
+namespace: This is a namespace (mapping) with definitions for the class body
+that will become the __dict__ attribute
+
+The common template for a metaclass is as follows:
+class Metaclass(type):
+    def __new__(mcs, name, bases, namespace):
+        return super().__new__(mcs, name, bases, namespace)
+
+    @classmethod
+    def __prepare__(mcs, name, bases, **kwargs):
+        return super().__prepare__(name, bases, **kwargs)
+
+    def __init__(cls, name, bases, namespace, **kwargs):
+        super().__init__(name, bases, namespace)
+
+    def __call__(cls, *args, **kwargs):
+        return super().__call__(*args, **kwargs)
+
+The name, bases, and namespace arguments have the samemeaning as in the type() call
+we explained earlier, but each of these four methods can have the following different
+purposes:
+
+__new__(mcs, name, bases, namespace): This is responsible for the actual
+creation of the class object in the same way as it does for ordinary classes. The
+first positional argument is a metaclass object. In the preceding example, it would
+simply be a Metaclass. Note that mcs is the popular naming convention for this
+argument.
+
+__prepare__(mcs, name, bases, **kwargs): This creates an empty
+namespace object. By default, it returns an empty dict, but it can be overridden
+to return any other mapping type. Note that it does not accept namespace as an
+argument because, before calling it, the namespace does not exist. Example usage
+of that method will be explained later in the New Python 3 syntax for metaclasses
+section.
+
+__init__(cls, name, bases, namespace, **kwargs): This is not seen
+popularly in metaclass implementations but has the same meaning as in ordinary
+classes. It can perform additional class object initialization once it is created
+with __new__(). The first positional argument is now named cls by convention
+to mark that this is already a created class object (metaclass instance) and not a
+metaclass object. When __init__() was called, the class was already
+constructed and so this method can do less things than the __new__() method.
+Implementing such a method is very similar to using class decorators, but the
+main difference is that __init__() will be called for every subclass, while class
+decorators are not called for subclasses.
+
+__call__(cls, *args, **kwargs): This is called when an instance of a
+metaclass is called. The instance of a metaclass is a class object (refer to Figure 1);
+it is invoked when you create new instances of a class. This can be used to
+override the default way of how class instances are created and initialized.
+
+exec, eval, and compile
+Python provides the following three built-in functions to manually execute, evaluate, and
+compile arbitrary Python code:
+
+exec(object, globals, locals): This allows you to dynamically execute
+the Python code. object should be a string or code object (see
+the compile() function) representing a single statement or sequence of multiple
+statements. The globals and locals arguments provide global and local
+namespaces for the executed code and are optional. If they are not provided, then
+the code is executed in the current scope. If provided, globals must be a
+dictionary, while locals might be any mapping object; it always returns None.
+
+eval(expression, globals, locals): This is used to evaluate the given
+expression by returning its value. It is similar to exec(), but it
+expects expression to be a single Python expression and not a sequence of
+statements. It returns the value of the evaluated expression.
+
+compile(source, filename, mode): This compiles the source into the code
+object or AST object. The source code is provided as a string value in the source
+argument. The filename should be the file from which the code was read. If it has
+no file associated (for example, because it was created dynamically),
+then <string> is the value that is commonly used. Mode should be
+either exec (sequence of statements), eval (single expression), or single (a
+single interactive statement, such as in a Python interactive session).
